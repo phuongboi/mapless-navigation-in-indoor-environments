@@ -1,7 +1,7 @@
 ### This repository is my implementation of paper "Virtual-to-real Deep Reinforcement Learning: Continuous Control of Mobile Robots for Mapless Navigation"
 * I using a pioneer robot equip with SICK lidar navigative in office area ( ~10mx10m) in Coppeliasim. Agent learning to avoid collision and reaching target position.
 * This project have used some parts from my previous projects https://github.com/phuongboi/fastslam-with-coppeliasim and https://github.com/phuongboi/land-following-with-reinforcement-learning
-### Updating
+### This project is updating ...
 #### [3/11/2023] First commit
 * Static environment
 * Sampling 27 among 270 sensor of SICK TIM310
