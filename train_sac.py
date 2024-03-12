@@ -53,14 +53,19 @@ class PolicyNetwork(nn.Module):
 
         self.fc_1 = nn.Linear(state_dim, 512)
         self.fc_2 = nn.Linear(512, 512)
+        # self.bn_1 = nn.BatchNorm1d(512)
+        # self.bn_2 = nn.BatchNorm1d(512)
         self.fc_mu = nn.Linear(512, action_dim)
         self.fc_std = nn.Linear(512, action_dim)
+        # self.bn_mu = nn.BatchNorm1d(action_dim)
+        # self.bn_std = nn.BatchNorm1d(action_dim)
+
 
         self.lr = actor_lr
 
         self.LOG_STD_MIN = -20
         self.LOG_STD_MAX = 2
-        self.max_linear = 1
+        self.max_linear = 0.5
         self.min_linear = 0
         self.max_angular = 1
         self.min_angular = -1
@@ -94,8 +99,8 @@ class PolicyNetwork(nn.Module):
 
         # # Enforcing Action Bound
         log_prob = reparameter.log_prob(x_t)
-        log_prob[0] = log_prob[0] - torch.sum(torch.log(self.linear_scale * (1 - y_t[0].pow(2)) + 1e-6), dim=-1, keepdim=True)
-        log_prob[1] = log_prob[1] - torch.sum(torch.log(self.angular_scale * (1 - y_t[1].pow(2)) + 1e-6), dim=-1, keepdim=True)
+        log_prob = log_prob - torch.sum(torch.log(self.scale * (1 - y_t.pow(2)) + 1e-6), dim=-1, keepdim=True)
+        #log_prob[1] = log_prob[1] - torch.sum(torch.log(self.angular_scale * (1 - y_t[1].pow(2)) + 1e-6), dim=-1, keepdim=True)
 
         return torch.Tensor(action), log_prob
 
@@ -111,7 +116,7 @@ class QNetwork(nn.Module):
 
         self.lr = critic_lr
 
-        self.optimizer = optim.SGD(self.parameters(), lr=self.lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=self.lr)
 
     def forward(self, x, a):
         h1 = F.leaky_relu(self.fc_s(x))
@@ -124,17 +129,17 @@ class QNetwork(nn.Module):
 
 class SAC_Agent:
     def __init__(self):
-        self.state_dim      = 31  # [cos(theta), sin(theta), theta_dot]
+        self.state_dim      = 17  # [cos(theta), sin(theta), theta_dot]
         self.action_dim     = 2  # [torque] in[-2,2]
-        self.lr_pi          = 0.00001
-        self.lr_q           = 0.00001
+        self.lr_pi          = 0.0001
+        self.lr_q           = 0.0001
         self.gamma          = 0.98
-        self.batch_size     = 32
+        self.batch_size     = 64
         self.buffer_limit   = 100000
         self.tau            = 0.005   # for soft-update of Q using Q-target
         self.init_alpha     = 0.01
         self.target_entropy = -self.action_dim  # == -1
-        self.lr_alpha       = 0.005
+        self.lr_alpha       = 0.0005
         self.DEVICE         = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.memory         = ReplayBuffer(self.buffer_limit, self.DEVICE)
         print("Device:", self.DEVICE)
@@ -153,6 +158,7 @@ class SAC_Agent:
         self.Q2_target.load_state_dict(self.Q2.state_dict())
 
     def choose_action(self, s):
+        self.PI.eval()
         with torch.no_grad():
             action, log_prob = self.PI.sample(s.to(self.DEVICE))
         return action, log_prob
@@ -221,7 +227,7 @@ class SAC_Agent:
 if __name__ == '__main__':
 
     ###### logging ######
-    log_name = '10103'
+    log_name = '12-3'
 
     model_save_dir = 'weights_sac/' + log_name
     if not os.path.isdir(model_save_dir): os.mkdir(model_save_dir)
@@ -232,10 +238,10 @@ if __name__ == '__main__':
     env = VrepEnvironment_SAC(speed=1.0, turn=0.25, rate=1)
     agent = SAC_Agent()
 
-    EPISODE = 3000
+    EPISODE = 800
     print_once = True
     score_list = []
-
+    steps_done = 0
     for EP in range(EPISODE):
         state = env.reset()
         score, done = 0.0, False
@@ -243,24 +249,28 @@ if __name__ == '__main__':
         while not done:
             action, log_prob = agent.choose_action(torch.FloatTensor(state))
             action = action.detach().cpu().numpy()  # GPU에 있는 텐서를 CPU로 옮기고 넘파이로 변환
-            #print(action)
+
             state_prime, reward, done, info = env.step(action)
-            #print(info)
+
             agent.memory.put((state, action, reward, state_prime, done))
 
             score += reward
 
             state = state_prime
-
-            if agent.memory.size() > 1000:  # 1000개의 [s,a,r,s']이 쌓이면 학습 시작
+            steps_done += 1
+            if agent.memory.size() > 20000:  # 1000개의 [s,a,r,s']이 쌓이면 학습 시작
                 if print_once: print("Start learning")
                 print_once = False
                 agent.train_agent()
+            if steps_done % 10000 == 0:
+                torch.save(agent.PI.state_dict(), model_save_dir + "/sac_actor_step_"+str(steps_done)+".pt")
+                #print("Avarage reward:", )
+
 
         print("EP:{}, Avg_Score:{:.1f}".format(EP, score))
         score_list.append(score)
 
-        if EP % 10 == 0:
-            torch.save(agent.PI.state_dict(), model_save_dir + "/sac_actor_EP"+str(EP)+".pt")
+        # if EP % 10 == 0:
+        #     torch.save(agent.PI.state_dict(), model_save_dir + "/sac_actor_EP"+str(EP)+".pt")
 
     np.savetxt(log_save_dir + '/mapless_score.txt', score_list)
