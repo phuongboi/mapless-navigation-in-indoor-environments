@@ -13,7 +13,7 @@
 * Navigate in dynamic environment
 
 ##### CoppeliaSim simulation
-* This is no speed up video 
+* This is no speed up video
 ![alt text]()
 
 ### Requirements
@@ -26,7 +26,7 @@
 * Run `python train_qlearning.py`
 * Test `python test_qlearning.py`
 ### Note
-*
+* It took near 24 hour to complete 600k step on my laptop for both simulation and training neural net
 *
 
 ### Reference
