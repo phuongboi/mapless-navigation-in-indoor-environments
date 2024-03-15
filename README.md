@@ -14,7 +14,7 @@
 
 ##### CoppeliaSim simulation
 * The video show robot reach 2 pre-defined goal before return to initial position
-![alt text](https://github.com/phuongboi/mapless-navigation-in-indoor-environments/tree/main/result/202403160010.gif)
+![alt text](https://github.com/phuongboi/mapless-navigation-in-indoor-environments/blob/main/result/202403160010.gif)
 
 ### Requirements
 * CoppeliaSim v4.5.1 linux
