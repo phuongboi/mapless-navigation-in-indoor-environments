@@ -1,6 +1,6 @@
 ### This repository is my implementation of paper "Virtual-to-real Deep Reinforcement Learning: Continuous Control of Mobile Robots for Mapless Navigation"
 * I using a pioneer robot equip with SICK lidar navigative in office area ( ~10mx10m) in Coppeliasim. Agent learning to avoid collision and reaching target position.
-* This project have used SAC implementation from [] and some parts from my previous projects [] and []
+* This project have used SAC implementation from [1](https://github.com/JM-Kim-94/rl-pendulum) and some parts from my previous projects [2](https://github.com/phuongboi/fastslam-with-coppeliasim) and [3](https://github.com/phuongboi/land-following-with-reinforcement-learning)
 
 #### [15/3/2024] First commit
 * Static environment ~ (10mx10m)
@@ -21,16 +21,16 @@
 * ROS Noetic, rospy
 ### Setup
 * Launch `roscore` in one terminal before launch Coppeliasim in another terminal to make sure that CoppeliaSim can load ROS plugin properly
-* Open vrep_scenario/room_d.ttt in CoppeliaSim and modify child_script of Pioneer_p3dx by v_rep_scenario/rosInterface_slam.lua
+* Open vrep_scenario/room_d1.ttt in CoppeliaSim and modify child_script of Pioneer_p3dx by v_rep_scenario/rosInterface_slam.lua
 * Start CoppeliaSim simulation, make sure topics is work as expect by `rostopic list`
-* Run `python train_qlearning.py`
-* Test `python test_qlearning.py`
+* Run `python train_sac.py`
+* Test `python test_sac.py`
 ### Note
 * It took near 24 hour to complete 600k step on my laptop for both simulation and training neural net
 *
 
 ### Reference
-* [1] https://github.com/andriusbern/slam
-* [2] https://github.com/kunnnnethan/FastSLAM
-* [3] Montemerlo, Michael, et al. "FastSLAM: A factored solution to the simultaneous localization and mapping problem." Aaai/iaai 593598 (2002).
-* [4] Grisetti, Giorgio, Cyrill Stachniss, and Wolfram Burgard. "Improved techniques for grid mapping with rao-blackwellized particle filters." IEEE transactions on Robotics 23.1 (2007): 34-46.
+* [1] https://github.com/JM-Kim-94/rl-pendulum
+* [2] https://github.com/phuongboi/fastslam-with-coppeliasim
+* [3] https://github.com/phuongboi/land-following-with-reinforcement-learning
+* [4] Tai, Lei, Giuseppe Paolo, and Ming Liu. "Virtual-to-real deep reinforcement learning: Continuous control of mobile robots for mapless navigation." 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2017.
