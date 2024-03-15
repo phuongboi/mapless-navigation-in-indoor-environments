@@ -235,10 +235,10 @@ if __name__ == '__main__':
     if not os.path.isdir(log_save_dir): os.mkdir(log_save_dir)
     ###### logging ######
 
-    env = VrepEnvironment_SAC(speed=1.0, turn=0.25, rate=1)
+    env = VrepEnvironment_SAC(rate=1, is_testing=False, fix_pos=(0,0))
     agent = SAC_Agent()
 
-    EPISODE = 800
+    EPISODE = 10000
     print_once = True
     score_list = []
     steps_done = 0
@@ -249,21 +249,23 @@ if __name__ == '__main__':
         while not done:
             action, log_prob = agent.choose_action(torch.FloatTensor(state))
             action = action.detach().cpu().numpy()  # GPU에 있는 텐서를 CPU로 옮기고 넘파이로 변환
-
             state_prime, reward, done, info = env.step(action)
-
+            #print(info)
             agent.memory.put((state, action, reward, state_prime, done))
 
             score += reward
 
             state = state_prime
             steps_done += 1
-            if agent.memory.size() > 20000:  # 1000개의 [s,a,r,s']이 쌓이면 학습 시작
+            if agent.memory.size() > 10000:  # 1000개의 [s,a,r,s']이 쌓이면 학습 시작
                 if print_once: print("Start learning")
                 print_once = False
                 agent.train_agent()
             if steps_done % 10000 == 0:
                 torch.save(agent.PI.state_dict(), model_save_dir + "/sac_actor_step_"+str(steps_done)+".pt")
+        if steps_done > 800000:
+            break
+
                 #print("Avarage reward:", )
 
 

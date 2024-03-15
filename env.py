@@ -60,7 +60,6 @@ class VrepEnvironment_Q():
         idx = np.random.randint(4)
         self.target_pos = np.round(region_list[idx], 4)
 
-
         target_pos_r = self.dist2target(robot_state)
         self.prev_dist = target_pos_r[0]
         state = laser_ranges + target_pos_r #+ action
@@ -148,7 +147,7 @@ class VrepEnvironment_Q():
 
 
 class VrepEnvironment_SAC():
-    def __init__(self, speed, turn, rate):
+    def __init__(self, rate, is_testing, fix_pos):
         #self.scan_sub = rospy.Subscriber('scanData', Float32MultiArray, self.scan_callback)
         self.left_pub = rospy.Publisher('leftMotorSpeed', Float32, queue_size=1, latch=True)
         self.right_pub = rospy.Publisher('rightMotorSpeed', Float32, queue_size=1, latch=True)
@@ -158,7 +157,8 @@ class VrepEnvironment_SAC():
         self.rate = rospy.Rate(rate) # frequence of motor speed publisher
         self.target_pos = []
         self.prev_dist = 0
-
+        self.fix_pos = fix_pos
+        self.is_testing = is_testing
 
     def reset(self):
         self.reset_pub.publish(Bool(True))
@@ -180,6 +180,8 @@ class VrepEnvironment_SAC():
         y_goal = np.random.uniform(low=0, high=-6)
 
         self.target_pos = np.round((x_goal, y_goal), 4)
+        if self.is_testing:
+            self.target_pos = np.array(self.fix_pos)
 
 
         target_pos_r = self.dist2target(robot_state)
@@ -190,11 +192,11 @@ class VrepEnvironment_SAC():
         state = list(laser_ranges) + list(robot_state) + list(self.target_pos) + action
 
         return np.array(state, dtype=np.float32)
-
+        
     def step(self, action):
         v_left, v_right = self.convert2leftright_vel(action)
-        self.left_pub.publish(v_left)
-        self.right_pub.publish(v_right)
+        self.left_pub.publish(v_left*4)
+        self.right_pub.publish(v_right*4)
         #self.rate.sleep()
 
         transform = rospy.wait_for_message('transformData', Transform)
@@ -246,11 +248,14 @@ class VrepEnvironment_SAC():
 
     def compute_reward(self, laser_ranges, target_pos_r):
         done = False
-        if target_pos_r[0] < 0.2: # arrived
-            reward = 10
+        goal_dist = 0.2
+        if self.is_testing:
+            goal_dist = 0.4
+        if target_pos_r[0] < goal_dist: # arrived
+            reward = 15
             done = True
         elif min(laser_ranges) < 0.4:
-            reward = -5
+            reward = -15
             done = True
         else:
             reward = np.round((self.prev_dist - target_pos_r[0]) * 500, 4)
