@@ -9,7 +9,6 @@
 * RL agent: Soft Actor critic
 * Linear velocity range: (0,0.5), angular velocity range: (-1, 1), speed up v_left, v_right 4 time
 
-
 #### TODO
 * Navigate in dynamic environment
 
@@ -28,7 +27,7 @@
 * Test `python test_sac.py`
 ### Note
 * It took near 24 hour to complete 600k step on my laptop for both simulation and training neural net
-*
+
 
 ### Reference
 * [1] https://github.com/JM-Kim-94/rl-pendulum
