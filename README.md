@@ -13,7 +13,7 @@
 * Navigate in dynamic environment
 
 ##### CoppeliaSim simulation
-* The video show robot reach 2 pre-defined goal before return to initial position
+* The video show robot reach 2 pre-defined goal before return to initial position.
 ![alt text](https://github.com/phuongboi/mapless-navigation-in-indoor-environments/blob/main/result/202403160010.gif)
 
 ### Requirements
@@ -21,13 +21,12 @@
 * ROS Noetic, rospy
 ### Setup
 * Launch `roscore` in one terminal before launch Coppeliasim in another terminal to make sure that CoppeliaSim can load ROS plugin properly
-* Open vrep_scenario/room_d1.ttt in CoppeliaSim and modify child_script of Pioneer_p3dx by v_rep_scenario/rosInterface_slam.lua
-* Start CoppeliaSim simulation, make sure topics is work as expect by `rostopic list`
-* Run `python train_sac.py`
-* Test `python test_sac.py`
+* Open vrep_scenario/room_d1.ttt in CoppeliaSim
+* Training using SAC `python train_sac.py`
+* Test pretrained model `python test_sac.py`
 ### Note
-* It took near 24 hour to complete 600k step on my laptop for both simulation and training neural net
-
+* It took near 20 hour to complete 600k step on my laptop for both simulation and training neural net, model start converge from step 300k
+* I got issue of action saturation when experimenting with SAC, after a few modify, issue have been fixed https://github.com/m5823779/motion-planner-reinforcement-learning/issues/1
 
 ### Reference
 * [1] https://github.com/JM-Kim-94/rl-pendulum
