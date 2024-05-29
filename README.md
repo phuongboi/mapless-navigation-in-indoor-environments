@@ -11,7 +11,8 @@
 
 #### TODO
 * Navigate in dynamic environment
-
+#### Note
+* This repo have some limitations, the goal position are not encode as relative position to robot, so robot only work well in pre-define region. The scenario setting is too easy which don't have obstacles.
 ##### CoppeliaSim simulation
 * The video show robot reach 2 pre-defined goal before return to initial position.
 ![alt text](https://github.com/phuongboi/mapless-navigation-in-indoor-environments/blob/main/result/202403160010.gif)

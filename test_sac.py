@@ -117,6 +117,7 @@ if __name__ == '__main__':
     agent = SAC_Agent(weight_file_path)
 
     fix_pos_list = [(0, -3.5), (4, -0.5), (0.5,-0.2)]
+
     env = VrepEnvironment_SAC(rate=1, is_testing=True, fix_pos=(0, 0))
     state = env.reset()
     for fix_pos in fix_pos_list:
